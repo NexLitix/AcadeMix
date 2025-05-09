@@ -87,7 +87,6 @@ async def process_question_description(message: Message, state: FSMContext):
 
 @user_router.callback_query(F.data.startswith("question_"))
 async def show_question_details(callback: CallbackQuery, state: FSMContext):
-    # Получаем id вопроса из callback_data (например, "question_5" → 5)
     qid = int(callback.data.split("_")[1])
     question = await ClassRatingService.get_question(qid)
     if not question:
@@ -98,7 +97,6 @@ async def show_question_details(callback: CallbackQuery, state: FSMContext):
 
 @user_router.callback_query(F.data.startswith("answer_online_"))
 async def answer_online(callback: CallbackQuery, state: FSMContext):
-    # Получаем id вопроса из callback_data (например, "answer_online_7" → 7)
     qid = int(callback.data.split("_")[-1])
     await state.update_data(qid=qid)
     await callback.message.answer(UserText.input_username, reply_markup=UI.cancel_button())
@@ -107,7 +105,6 @@ async def answer_online(callback: CallbackQuery, state: FSMContext):
 
 @user_router.callback_query(F.data.startswith("answer_offline_"))
 async def answer_offline(callback: CallbackQuery, state: FSMContext):
-    # Получаем id вопроса из callback_data (например, "answer_offline_7" → 7)
     qid = int(callback.data.split('_')[-1])
     await state.update_data(qid=qid)
     await callback.message.answer(UserText.input_meeting_datetime, reply_markup=UI.cancel_button())
