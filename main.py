@@ -7,7 +7,7 @@ from aiogram.client.default import DefaultBotProperties
 
 from app.config import BOT_TOKEN
 from app.handlers import main_router
-from app.services import init_classes_db
+from app.database.manager import init_classes_db
 
 import asyncio
 

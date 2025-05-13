@@ -9,7 +9,8 @@ from ..text import UserText, EMOJI
 from ..utils import PermissionCheck
 from ..fsm_states import QuestionStates, AnswerStates
 
-from ..services import ClassRatingService
+from ..database.classes import ClassRatingService
+
 
 user_router = Router()
 

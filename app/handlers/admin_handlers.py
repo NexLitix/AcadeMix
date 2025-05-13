@@ -9,7 +9,9 @@ from ..fsm_states import PointsStates
 from ..middlewares.admin_middleware import AdminMiddleware
 import os
 import aiosqlite
-from ..services import ClassRatingService
+
+from ..database.classes import ClassRatingService
+
 
 admin_router = Router()
 admin_router.message.middleware(AdminMiddleware())
