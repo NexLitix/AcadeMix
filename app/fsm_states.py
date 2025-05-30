@@ -11,3 +11,6 @@ class AnswerStates(StatesGroup):
 
 class PointsStates(StatesGroup):
     points = State()
+
+class HeadmanContactStates(StatesGroup):
+    contact = State()

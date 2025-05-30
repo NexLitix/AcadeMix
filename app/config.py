@@ -8,8 +8,9 @@ admin_ids_str = os.getenv('ADMIN_IDS')
 ADMIN_IDS = [int(x) for x in admin_ids_str.split(',') if x] if admin_ids_str else []
 if ADMINS not in ADMIN_IDS:
     ADMIN_IDS.append(ADMINS)
-DB_PATH = os.getenv("USER_DB_PATH")
+USER_DB_PATH = os.getenv("USER_DB_PATH")
 CLASS_DB_PATH = os.getenv("CLASS_DB_PATH")
+
 
 class Settings:
     compact_string_length: int = 50

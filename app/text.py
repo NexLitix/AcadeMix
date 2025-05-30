@@ -36,8 +36,8 @@ class UserText:
     select_question             = f"Выберите вопрос для просмотра:"
     question_not_found          = f"{EMOJI['error']} Вопрос не найден."
 
-    input_username              = f"{EMOJI['mail']} Введите ваш Telegram-контакт (например, @username):"
-    invalid_username            = "Пожалуйста, введите корректный Telegram-контакт (например, @username):"
+    send_contact                = f"{EMOJI['add']} Нажмите на кнопку 'Отправить' ниже и отправьте контакт пользователя, которого хотите сделать старостой!"
+    headman_added_successfully  = f"{EMOJI['success']} Староста успешно добавлен! Контакту присвоена своя административная панель."
 
     answer_sent                 = f"{EMOJI['success']} Ваш ответ отправлен автору вопроса!"
     input_meeting_datetime      = f"{EMOJI['calendar']} Введите дату и время встречи (например, 12.05 15:00):"
@@ -45,5 +45,19 @@ class UserText:
     cancelled = "Отменено"
 
     @staticmethod
-    async def process_scores_text(class_name: str, score: int):
+    async def process_scores_text(class_name: str, score: int) -> str:
         return f"{EMOJI['open_status']} Класс {class_name} получил +{score} баллов!"
+
+    @staticmethod
+    async def some_error_occurred(error_text: str) -> str:
+        return f"{EMOJI['warning']} Операцию не удалось закончить! <b>Произошла ошибка:</b>\n{error_text}"
+    
+
+class DatabaseText:
+    classes_db_excel_sent = f'{EMOJI['rating']} Отправляю .xlsx (excel) файл базы данных классов...'
+
+    async def classes_db_not_found_on_path(class_db_path: str) -> str:
+        return f"{EMOJI['cancel']} Файл базы данных не найден по пути: {class_db_path}"
+    
+    async def classes_db_checked(count: int, class_db_path: str) -> str:
+        return f"{EMOJI['success']} База данных в порядке\n📁 Путь: {class_db_path}\n📊 Количество классов: {count}"

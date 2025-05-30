@@ -1,3 +1,4 @@
+from aiogram.types import KeyboardButtonRequestUser
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, \
                           InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -8,9 +9,8 @@ from typing import List, Tuple, Dict
 
 
 class UI:
-    @staticmethod
-    def main_menu():
-        return ReplyKeyboardMarkup(
+    
+    main_menu = ReplyKeyboardMarkup(
             keyboard=[
                 [
                     KeyboardButton(text=f'{EMOJI["question"]} Задать вопрос'),
@@ -19,14 +19,15 @@ class UI:
                 [
                     KeyboardButton(text=f'{EMOJI["rating"]} Рейтинг классов'),
                     KeyboardButton(text=f'{EMOJI["help"]} Помощь')
+                ],
+                [
+                    KeyboardButton(text=f'{EMOJI['add']} Добавить старосту'),
                 ]
             ],
             resize_keyboard=True
         )
     
-    @staticmethod
-    def admin_menu():
-        return ReplyKeyboardMarkup(
+    admin_menu = ReplyKeyboardMarkup(
             keyboard=[
                 [
                     KeyboardButton(text=f'{EMOJI["add"]} Добавить баллы'),
@@ -39,14 +40,23 @@ class UI:
             resize_keyboard=True
         )
     
-    @staticmethod
-    def cancel_button():
-        return ReplyKeyboardMarkup(
+    cancel_button = ReplyKeyboardMarkup(
             keyboard=[
                 [KeyboardButton(text=f"{EMOJI['cancel']} Отмена")]
             ],
             resize_keyboard=True
         )
+    
+    help_button = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="Перейти к помощнику", url=Settings.helper_bot_url)]
+            ]
+        )
+    
+    request_user = ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text='Отправить', request_user=KeyboardButtonRequestUser(request_id=1, user_is_bot=False))],
+            ])    
     
     @staticmethod
     def answer_type_buttons(qid: int):
@@ -68,14 +78,7 @@ class UI:
                 [InlineKeyboardButton(text=f"{EMOJI['pin']} {text}", callback_data=f"question_{q[0]}")]
             )
         return InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
-    
-    @staticmethod
-    def help_button():
-        return InlineKeyboardMarkup(
-            inline_keyboard=[
-                [InlineKeyboardButton(text="Перейти к помощнику", url=Settings.helper_bot_url)]
-            ]
-        )
+
     
     @staticmethod
     def format_class_rating(scores: List[Tuple]) -> str:

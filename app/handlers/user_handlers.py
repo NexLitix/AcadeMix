@@ -10,6 +10,7 @@ from ..utils import PermissionCheck
 from ..fsm_states import QuestionStates, AnswerStates
 
 from ..database.classes import ClassRatingService
+from ..database.users import UsersTable, QuestionsTable, AnswersTable
 
 
 user_router = Router()
@@ -20,14 +21,14 @@ async def cmd_start(message: Message):
     if await PermissionCheck.is_bot_admin(message):
         await message.answer(UserText.admin_panel, reply_markup=UI.admin_menu())
     else:
-        await ClassRatingService.register_user(uid, message.from_user.username or '')
+        await UsersTable.register_user(uid, message.from_user.username or '')
         await message.answer(UserText.start_message, reply_markup=UI.main_menu())
 
 
 @user_router.message(Command(commands=["help"]))
 @user_router.message(F.text == f"{EMOJI['help']} Помощь")
 async def cmd_help(message: Message):
-    await message.answer(UserText.about, reply_markup=UI.help_button(),)
+    await message.answer(UserText.about, reply_markup=UI.help_button)
 
 
 @user_router.message(F.text == f"{EMOJI['rating']} Рейтинг классов")
@@ -42,7 +43,7 @@ async def show_rating(message: Message):
 
 @user_router.message(F.text == f"{EMOJI['open']} Открытые вопросы")
 async def show_open_questions(message: Message):
-    questions = await ClassRatingService.get_open()
+    questions = await QuestionsTable.get_opened()
     if not questions:
         await message.answer(UserText.no_opened_questions, reply_markup=UI.main_menu())
     else:
@@ -81,7 +82,7 @@ async def process_question_description(message: Message, state: FSMContext):
         description = message.text.strip()
         if description == '-':
             description = ''
-        await ClassRatingService.save_question(message.from_user.id, title, description)
+        await QuestionsTable.save_question(message.from_user.id, title, description)
         await message.answer(UserText.question_sent_successfully, reply_markup=UI.main_menu())
         await state.clear()
 
@@ -89,7 +90,7 @@ async def process_question_description(message: Message, state: FSMContext):
 @user_router.callback_query(F.data.startswith("question_"))
 async def show_question_details(callback: CallbackQuery, state: FSMContext):
     qid = int(callback.data.split("_")[1])
-    question = await ClassRatingService.get_question(qid)
+    question = await QuestionsTable.get_question(qid)
     if not question:
         await callback.message.answer(UserText.question_not_found, reply_markup=UI.main_menu())
     else:
@@ -124,7 +125,7 @@ async def process_online_answer(message: Message, state: FSMContext):
             data = await state.get_data()
             qid = data.get("qid")
             contact = message.text.strip()
-            await ClassRatingService.save_online_answer(qid, message.from_user.id, contact)
+            await AnswersTable.save_online_answer(qid, message.from_user.id, contact)
             await message.answer(UserText.answer_sent, reply_markup=UI.main_menu())
             await state.clear()
 
@@ -138,7 +139,7 @@ async def process_offline_answer(message: Message, state: FSMContext):
         data = await state.get_data()
         qid = data.get("qid")
         meeting_time = message.text.strip()
-        await ClassRatingService.save_offline_answer(qid, message.from_user.id, meeting_time)
+        await AnswersTable.save_offline_answer(qid, message.from_user.id, meeting_time)
         await message.answer(UserText.answer_sent, reply_markup=UI.main_menu())
         await state.clear()
 
