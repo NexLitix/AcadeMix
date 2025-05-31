@@ -123,6 +123,25 @@ class UsersTable:
             if result[0] == UsersTableSettings.is_headman_flag:
                 return True
             return False
+        
+    @staticmethod
+    async def get_user(user_id: int) -> tuple[int, str, int, str, bool]:
+        '''The method gets a user by their ID.'''
+        request = 'SELECT * FROM users WHERE id = ?'
+        async with aiosqlite.connect(USER_DB_PATH) as db:
+            cursor = await db.execute(request, (user_id, ))
+            result = await cursor.fetchone()
+            return result
+        
+    @staticmethod
+    async def add_points(user_id: int, points_to_add: int) -> None:
+        '''The method adds points `points_to_add` to a user's total score'''
+        user_data = await UsersTable.get_user(user_id)
+        current_points = user_data[2]
+        request = 'UPDATE users SET points = ? WHERE id = ?'
+        async with aiosqlite.connect(USER_DB_PATH) as db:
+            await db.execute(request, (current_points + points_to_add, user_id))
+            await db.commit()
 
     
 class QuestionsTable:
@@ -255,3 +274,43 @@ class BattlesTable:
         async with aiosqlite.connect(USER_DB_PATH) as db:
             await db.execute(request, (1, bid))
             await db.commit()
+
+    @staticmethod
+    async def finish_battle(bid: int, winner: int) -> None:
+        ''' '''
+        battle = await BattlesTable.get_battle(bid)
+        participants = [battle[1], battle[2]]
+        if winner in participants:
+            request = 'UPDATE battles SET winner = ?, over_at = ? WHERE id = ?'
+            async with aiosqlite.connect(USER_DB_PATH) as db:
+                await db.execute(request, (winner, datetime.now().strftime('%Y-%m-%d %H:%M'), bid))
+                battle = await BattlesTable.get_battle(bid)
+                points = battle[3]
+                await UsersTable.add_points(winner, points)
+                await db.commit()
+        else:
+            raise ValueError
+
+    @staticmethod
+    async def get_battle(bid: int) -> tuple[int, int, int, int, bool, str, int | None, str, str | None]:
+        '''The method gets a battle by its ID.'''
+        request = 'SELECT * FROM battles WHERE id = ?'
+        async with aiosqlite.connect(USER_DB_PATH) as db:
+            cursor = await db.execute(request, (bid, ))
+            result = await cursor.fetchone()
+            return result
+
+    @staticmethod
+    async def get_finished() -> list[tuple]:
+        ''' '''
+        request = 'SELECT * FROM battles WHERE over_at = ?'
+        async with aiosqlite.connect(USER_DB_PATH) as db:
+            cursor = await db.execute(request, (None, ))
+            rows = await cursor.fetchall()
+            return rows
+        
+    @staticmethod
+    async def get_accepted() -> list[tuple]:
+        ''' '''
+        ...
+

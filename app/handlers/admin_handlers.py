@@ -60,12 +60,13 @@ async def process_score(message: Message, state: FSMContext):
             await message.answer(e)
             await state.clear()
         else:
-            success = await ClassRatingService.add_class_score(data['class_name'], data['score'])
-            if success:
-                await message.answer(await UserText.process_scores_text(data['class_name'], data['score']), reply_markup=UI.admin_menu())
-            else:
+            try:
+                await ClassRatingService.add_class_score(data['class_name'], data['score'])
+            except Exception as e:
                 await message.answer(UserText.adding_points_error, reply_markup=UI.admin_menu())
                 await state.clear()
+            else:
+                await message.answer(await UserText.process_scores_text(data['class_name'], data['score']), reply_markup=UI.admin_menu())
 
 
 @admin_router.message(F.text == f"{EMOJI['check']} Проверить БД")

@@ -104,15 +104,6 @@ async def answer_online(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer(UserText.input_username, reply_markup=UI.cancel_button())
     await state.set_state(AnswerStates.contact)
 
-
-@user_router.callback_query(F.data.startswith("answer_offline_"))
-async def answer_offline(callback: CallbackQuery, state: FSMContext):
-    qid = int(callback.data.split('_')[-1])
-    await state.update_data(qid=qid)
-    await callback.message.answer(UserText.input_meeting_datetime, reply_markup=UI.cancel_button())
-    await state.set_state(AnswerStates.meeting_time)
-
-
 @user_router.message(AnswerStates.contact)
 async def process_online_answer(message: Message, state: FSMContext):
     if message.text == f"{EMOJI['cancel']} Отмена":
@@ -130,6 +121,13 @@ async def process_online_answer(message: Message, state: FSMContext):
             await state.clear()
 
 
+@user_router.callback_query(F.data.startswith("answer_offline_"))
+async def answer_offline(callback: CallbackQuery, state: FSMContext):
+    qid = int(callback.data.split('_')[-1])
+    await state.update_data(qid=qid)
+    await callback.message.answer(UserText.input_meeting_datetime, reply_markup=UI.cancel_button())
+    await state.set_state(AnswerStates.meeting_time)
+
 @user_router.message(AnswerStates.meeting_time)
 async def process_offline_answer(message: Message, state: FSMContext):
     if message.text == f"{EMOJI['cancel']} Отмена":
@@ -142,6 +140,7 @@ async def process_offline_answer(message: Message, state: FSMContext):
         await AnswersTable.save_offline_answer(qid, message.from_user.id, meeting_time)
         await message.answer(UserText.answer_sent, reply_markup=UI.main_menu())
         await state.clear()
+
 
     
 

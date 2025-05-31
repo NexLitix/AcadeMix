@@ -10,8 +10,8 @@ class_db_path = CLASS_DB_PATH or os.path.join(os.path.dirname(os.path.dirname(__
 class ClassRatingService:
     '''The class manages requests to the classes table.'''
     
-    async def init_classes_db():
-        '''Initialization...'''
+    async def init_classes_db() -> None:
+        '''Classes database initialization.'''
         dir_path = os.path.dirname(class_db_path)
         if dir_path and not os.path.exists(dir_path):
             os.makedirs(dir_path, exist_ok=True)
@@ -25,21 +25,14 @@ class ClassRatingService:
             await db.commit()
 
     @staticmethod
-    async def add_class_score(class_name: str, score: int) -> bool:
+    async def add_class_score(class_name: str, score_to_add: int) -> None:
         '''The method adds scores to a class.'''
         async with aiosqlite.connect(class_db_path) as db:
-            request = 'SELECT total_score FROM class_scores WHERE class_name = ?'
-            cursor = await db.execute(request, (class_name, ))
-            result = await cursor.fetchone()
-            if result:
-                new_score = result[0] + score
-                request = 'UPDATE class_scores SET total_score = ? WHERE class_name = ?'
-                await db.execute(request, (new_score, class_name))
-            else:
-                request = 'INSERT INTO class_scores (class_name, total_score) VALUES (?, ?)'
-                await db.execute(request, (class_name, score))
+            class_ = await ClassRatingService.get_class_by_name(class_name)
+            current_score = class_[2]
+            request = 'class_scores SET total_score = ? WHERE class_name = ?'
+            await db.execute(request, (current_score + score_to_add, class_name))
             await db.commit()
-            return True
 
     @staticmethod
     async def get_class_scores() -> list[tuple[int, str, int]]:
@@ -49,6 +42,24 @@ class ClassRatingService:
             cursor = await db.execute(request)
             rows = await cursor.fetchall()
             return rows
+        
+    @staticmethod
+    async def get_class_by_id(class_id: int) -> tuple[int, str, int]:
+        '''The method gets class data by its ID.'''
+        request = 'SELECT * FROM class_scores WHERE id = ?'
+        async with aiosqlite.connect(class_db_path) as db:
+            cursor = await db.execute(request, (class_id, ))
+            result = await cursor.fetchone()
+            return result
+    
+    @staticmethod
+    async def get_class_by_name(class_name: str) -> tuple[int, str, int]:
+        '''The method gets class data by its unique name.'''
+        request = 'SELECT * FROM class_scores WHERE class_name = ?'
+        async with aiosqlite.connect(class_db_path) as db:
+            cursor = await db.execute(request, (class_name, ))
+            result = await cursor.fetchone()
+            return result
 
     @staticmethod
     async def get_columns_names(table_name: str) -> list[str]:
